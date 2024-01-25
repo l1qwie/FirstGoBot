@@ -1,7 +1,9 @@
 package main
 
 import (
-	Executer "firstgobot/Executer"
+	"firstgobot/bot"
+	executer "firstgobot/byogram/executer"
+	"firstgobot/byogram/types"
 	"fmt"
 )
 
@@ -14,19 +16,19 @@ func main() {
 		err     error
 	)
 
-	err = Executer.HowToKnowOffset(TelebotToken, &offset)
+	err = executer.HowToKnowOffset(types.TelebotToken, &offset)
 	if err != nil {
 		fmt.Println("Возникла ошибка при попытке узнать offset:", err)
 	} else {
 		for {
-			err = Executer.DoGetUpdates(TelebotToken, &offset, &user_id, &text, &name)
+			err = executer.DoGetUpdates(types.TelebotToken, &offset, &user_id, &text, &name)
 			if err != nil {
 				fmt.Println("Ошибка при получении обновлений от Telegram:", err)
 			} else {
-				err = Executer.Redirectioner(TelebotToken, text, name, user_id)
-				if err != nil {
-					fmt.Println("Ошибка при попытке отправить сообщенрие пользователю:", err)
-				}
+				bot.Acceptance(text, name, user_id)
+				//if err != nil {
+				//	fmt.Println("Ошибка при попытке отправить сообщенрие пользователю:", err)
+				//}
 				offset = offset + 1
 			}
 		}
