@@ -6,26 +6,29 @@ import (
 )
 
 func main() {
-	var offset int
-	var text string
-	var name string
-	var err error
+	var (
+		offset  int
+		text    string
+		name    string
+		user_id int
+		err     error
+	)
 
 	err = Executer.HowToKnowOffset(TelebotToken, &offset)
 	if err != nil {
 		fmt.Println("Возникла ошибка при попытке узнать offset:", err)
 	} else {
-		for true {
-			err = Executer.DoGetUpdates(TelebotToken, &offset, &text, &name)
+		for {
+			err = Executer.DoGetUpdates(TelebotToken, &offset, &user_id, &text, &name)
 			if err != nil {
 				fmt.Println("Ошибка при получении обновлений от Telegram:", err)
 			} else {
-				err = Executer.Redirectioner(TelebotToken, text, &name)
+				err = Executer.Redirectioner(TelebotToken, text, name, user_id)
 				if err != nil {
 					fmt.Println("Ошибка при попытке отправить сообщенрие пользователю:", err)
 				}
+				offset = offset + 1
 			}
-			offset = offset + 1
 		}
 	}
 

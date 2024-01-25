@@ -25,5 +25,6 @@ type InfMessage struct {
 }
 
 type FromUser struct {
-	Name string `json:"first_name"`
+	UserID int    `json:"id"`
+	Name   string `json:"first_name"`
 }

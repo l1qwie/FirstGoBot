@@ -11,61 +11,52 @@ import (
 
 const httpsRequest = "https://api.telegram.org/"
 
-func Updates(TelebotToken string, offset *int, text *string, name *string) (returnederr error) {
-	var url string
-	var response *http.Response
-	var body []byte
-	var err error
+func Updates(TelebotToken string, offset, user_id *int, text, name *string) (err error) {
+	var (
+		url      string
+		response *http.Response
+		body     []byte
+	)
 
 	url = fmt.Sprintf(httpsRequest+"bot%s/getUpdates?limit=1&offset=%d", TelebotToken, *offset)
-
 	response, err = http.Get(url)
-	if err != nil {
-		returnederr = err
-	} else {
+	if err == nil {
 		defer response.Body.Close()
 		body, err = io.ReadAll(response.Body)
-		if err != nil {
-			returnederr = err
+		if err == nil {
+			err = handleTelegramResponse(body, text, name, user_id)
+		}
+	}
+
+	return err
+}
+
+func handleTelegramResponse(response []byte, text, name *string, user_id *int) (err error) {
+	var telegramAnswer types.TelegramAnswer
+	err = json.Unmarshal(response, &telegramAnswer)
+	if err == nil {
+		if !telegramAnswer.Ok {
+			err = fmt.Errorf("Telegram API вернул ошибку: %s", telegramAnswer.Result)
 		} else {
-			err = handleTelegramResponse(body, text, name)
-			if err != nil {
-				returnederr = err
+			if len(telegramAnswer.Result) > 0 {
+				*text = telegramAnswer.Result[0].Message.Text
+				*name = telegramAnswer.Result[0].Message.TypeFrom.Name
+				*user_id = telegramAnswer.Result[0].Message.TypeFrom.UserID
+				fmt.Println(fmt.Sprintf("Обработка успешного ответа от Telegram. Name: %s Text: %s UserID: %d", string(*name), string(*text), int(*user_id)))
+			} else {
+				err = fmt.Errorf("telegramAnswer.Result ничему не равен!")
 			}
 		}
 	}
 
-	return returnederr
+	return err
 }
 
-func handleTelegramResponse(response []byte, text *string, name *string) (returnederr error) {
-	var telegramAnswer types.TelegramAnswer
-	var err error
-	err = json.Unmarshal(response, &telegramAnswer)
-	if err != nil {
-		returnederr = err
-	} else if !telegramAnswer.Ok {
-		returnederr = fmt.Errorf("Telegram API вернул ошибку: %s", telegramAnswer.Result)
-	} else if len(telegramAnswer.Result) > 0 {
-		*text = telegramAnswer.Result[0].Message.Text
-		*name = telegramAnswer.Result[0].Message.TypeFrom.Name
-
-		str := fmt.Sprintf("Обработка успешного ответа от Telegram. Name: %s Text: %s", string(*name), string(*text))
-		fmt.Println(str)
-	} else {
-		returnederr = fmt.Errorf("telegramAnswer.Result ничему не равен!")
-	}
-	return returnederr
-}
-
-func FirstStep(response []byte, offset *int) (returnederr error) {
+func FirstStep(response []byte, offset *int) (err error) {
 	var telegramResponse types.TelegramResponse
-	var err error
 
 	err = json.Unmarshal(response, &telegramResponse)
-	if err != nil {
-		returnederr = err
-	} else {
+	if err == nil {
 		// Проверка, что Result - это массив
 		if len(telegramResponse.Result) > 0 {
 			// Перебираем элементы массива
@@ -74,18 +65,19 @@ func FirstStep(response []byte, offset *int) (returnederr error) {
 				fmt.Println("Обработка успешного ответа от Telegram. Update_id =", storage.ID)
 			}
 		} else {
-			returnederr = fmt.Errorf("Telegram API вернул пустой массив результатов")
+			err = fmt.Errorf("Telegram API вернул пустой массив результатов")
 		}
 	}
 
-	return returnederr
+	return err
 }
 
 func RequestOffset(TelebotToken string, offset *int) (returnederr error) {
-	//var url string
-	var response *http.Response
-	var body []byte
-	var err error
+	var (
+		response *http.Response
+		body     []byte
+		err      error
+	)
 
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?limit=1", url.PathEscape(TelebotToken))
 	response, err = http.Get(url)
