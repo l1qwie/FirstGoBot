@@ -1,6 +1,17 @@
 package types
 
+import (
+	"encoding/json"
+	"log"
+)
+
 const HttpsRequest = "https://api.telegram.org/"
+
+type SendMessagePayload struct {
+	ChatID      int    `json:"chat_id"`
+	Text        string `json:"text"`
+	ReplyMarkup string `json:"reply_markup"`
+}
 
 type TelegramResponse struct {
 	Ok     bool            `json:"ok"`
@@ -8,13 +19,12 @@ type TelegramResponse struct {
 }
 
 type InlineKeyboardMarkup struct {
-	Kb []InlineKeyboardButton
+	Buttons [][]InlineKeyboardButton `json:"inline_keyboard"`
 }
 
 type InlineKeyboardButton struct {
-	Text          string
-	Url           string
-	Callback_data string
+	Text         string `json:"text"`
+	CallbackData string `json:"callback_data"`
 }
 
 type StorageOfJson struct {
@@ -39,4 +49,18 @@ type InfMessage struct {
 type FromUser struct {
 	UserID int    `json:"id"`
 	Name   string `json:"first_name"`
+}
+
+func CreateInlineKeyoard(keyboard InlineKeyboardMarkup) string {
+	var (
+		jsonData []byte
+		err      error
+	)
+
+	jsonData, err = json.Marshal(keyboard)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(jsonData)
 }
