@@ -32,6 +32,7 @@ func Updates(TelebotToken string, offset, user_id *int, text, name *string) (err
 func handleTelegramResponse(response []byte, text, name *string, user_id *int) (err error) {
 	var telegramAnswer types.TelegramAnswer
 	err = json.Unmarshal(response, &telegramAnswer)
+	fmt.Println(fmt.Sprintf("Json-ответ от телеграма: %s", response))
 	if err == nil {
 		if !telegramAnswer.Ok {
 			err = fmt.Errorf("Telegram API вернул ошибку: %s", telegramAnswer.Result)

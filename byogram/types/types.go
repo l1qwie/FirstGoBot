@@ -11,6 +11,13 @@ type SendMessagePayload struct {
 	ChatID      int    `json:"chat_id"`
 	Text        string `json:"text"`
 	ReplyMarkup string `json:"reply_markup"`
+	Photo       string `json:"photo"`
+}
+
+type MessagePhoto struct {
+	ChatID  int    `json:"chat_id"`
+	Caption string `json:"caption"`
+	Photo   string `json:"photo"`
 }
 
 type TelegramResponse struct {

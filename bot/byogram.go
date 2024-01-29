@@ -2,28 +2,46 @@ package bot
 
 import (
 	redirection "firstgobot/bot/redirection"
-	by "firstgobot/byogram/methods"
+	"firstgobot/byogram/formatter"
 )
 
-func doSend(text, image, keyboard string, chatID int) {
+func doSend(text, image, kbName, kbData string, chatID int) {
+	var (
+		fm          formatter.Formatter
+		coordinates []int
+	)
+
 	if text != "" {
-		if keyboard != "" {
-			by.SendMessageWithKeyboard(text, keyboard, chatID)
+		if kbName != "" && kbData != "" {
+			fm.WriteString(text)
+			fm.WriteChatId(chatID)
+			for i := 0; i < 2; i++ {
+				coordinates = append(coordinates, 1)
+			}
+			fm.SetIkbdDim(coordinates)
+			fm.WriteInlineButtonCmd(kbName, kbData)
+			fm.WriteInlineButtonCmd(kbName, kbData)
+			//fm.WriteInlineButtonUrl(kbName, kbData)
+			fm.SendMessage()
+		} else if image != "" {
+			//methods.SendPhoto(image, chatID)
+			fm.AddPhotoFromMemmory(image)
+			//fm.WriteString(text)
+			fm.WriteChatId(chatID)
+			fm.SendMessage()
 		} else {
-			by.SendMessage(text, chatID)
+			fm.WriteString(text)
+			fm.WriteChatId(chatID)
+			fm.SendMessage()
 		}
-	} else if image != "" {
-		by.SendPhoto(image, chatID)
 	}
 }
 
 func Acceptance(phrase, name string, chatID int) {
 	var (
-		text     string
-		image    string
-		keyboard string
+		text, image, kbName, kbData string
 	)
-	text, image, keyboard = redirection.DispatcherPhrase(phrase, name, chatID)
+	text, image, kbName, kbData = redirection.DispatcherPhrase(phrase, name, chatID)
 
-	doSend(text, image, keyboard, chatID)
+	doSend(text, image, kbName, kbData, chatID)
 }

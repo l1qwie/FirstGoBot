@@ -2,7 +2,6 @@ package methods
 
 import (
 	"bytes"
-	"encoding/json"
 	"firstgobot/byogram/executer"
 	"firstgobot/byogram/types"
 	"fmt"
@@ -52,24 +51,13 @@ func SendMessage(text string, chatID int) {
 	}
 }
 
-func SendMessageWithKeyboard(text, keyboard string, chatID int) {
+func Send(buf *bytes.Buffer, function, contenttype string) {
 	var (
-		payload     types.SendMessagePayload
-		jsonPayload []byte
-		err         error
-		url         string
+		err error
+		url string
 	)
-
-	payload = types.SendMessagePayload{
-		ChatID:      chatID,
-		Text:        text,
-		ReplyMarkup: keyboard,
-	}
-	jsonPayload, err = json.Marshal(payload)
-	if err == nil {
-		url = fmt.Sprintf("%sbot%s/sendMessage", types.HttpsRequest, types.TelebotToken)
-		err = executer.GetpostRequest(url, bytes.NewBuffer(jsonPayload), "application/json")
-	}
+	url = fmt.Sprintf("%sbot%s/%s", types.HttpsRequest, types.TelebotToken, function)
+	err = executer.GetpostRequest(url, buf, contenttype)
 
 	if err != nil {
 		log.Fatal(err)

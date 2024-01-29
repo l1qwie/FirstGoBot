@@ -23,7 +23,7 @@ func main() {
 	for {
 		err = executer.DoGetUpdates(types.TelebotToken, &offset, &user_id, &text, &name)
 		if err != nil {
-			fmt.Println("Ошибка при получении обновлений от Telegram:", err)
+			fmt.Println("Обновления не были получены: ", err)
 		} else {
 			bot.Acceptance(text, name, user_id)
 			//if err != nil {
