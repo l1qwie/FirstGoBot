@@ -12,6 +12,7 @@ type SendMessagePayload struct {
 	Text        string `json:"text"`
 	ReplyMarkup string `json:"reply_markup"`
 	Photo       string `json:"photo"`
+	Video       string `json:"video"`
 }
 
 type MessagePhoto struct {
@@ -34,6 +35,11 @@ type InlineKeyboardButton struct {
 	CallbackData string `json:"callback_data"`
 }
 
+type Callback struct {
+	TypeFrom FromUser `json:"from"`
+	Data     string   `json:"data"`
+}
+
 type StorageOfJson struct {
 	ID int `json:"update_id"`
 }
@@ -46,6 +52,7 @@ type TelegramAnswer struct {
 type TelegramUpdate struct {
 	UpdateID int        `json:"update_id"`
 	Message  InfMessage `json:"message"`
+	Query    Callback   `json:"callback_query"`
 }
 
 type InfMessage struct {

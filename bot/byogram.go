@@ -3,45 +3,58 @@ package bot
 import (
 	redirection "firstgobot/bot/redirection"
 	"firstgobot/byogram/formatter"
+	"log"
 )
 
-func doSend(text, image, kbName, kbData string, chatID int) {
+func doSend(text, image, video string, kbName, kbData []string, chatID int) {
 	var (
 		fm          formatter.Formatter
 		coordinates []int
+		err         error
 	)
 
 	if text != "" {
-		if kbName != "" && kbData != "" {
+		if kbName != nil && kbData != nil {
 			fm.WriteString(text)
 			fm.WriteChatId(chatID)
 			for i := 0; i < 2; i++ {
 				coordinates = append(coordinates, 1)
 			}
 			fm.SetIkbdDim(coordinates)
-			fm.WriteInlineButtonCmd(kbName, kbData)
-			fm.WriteInlineButtonCmd(kbName, kbData)
+			for i := 0; i < 2; i++ {
+				fm.WriteInlineButtonCmd(kbName[i], kbData[i])
+			}
+			//fm.WriteInlineButtonCmd(kbName, kbData)
+			//fm.WriteInlineButtonCmd(kbName, kbData)
 			//fm.WriteInlineButtonUrl(kbName, kbData)
-			fm.SendMessage()
+			err = fm.SendMessage()
 		} else if image != "" {
-			//methods.SendPhoto(image, chatID)
-			fm.AddPhotoFromMemmory(image)
-			//fm.WriteString(text)
+			fm.AddPhotoFromTG(image)
+			fm.WriteString(text)
 			fm.WriteChatId(chatID)
-			fm.SendMessage()
+			err = fm.SendMessage()
+		} else if video != "" {
+			fm.AddVideoFromTG(video)
+			fm.WriteString(text)
+			fm.WriteChatId(chatID)
+			err = fm.SendMessage()
 		} else {
 			fm.WriteString(text)
 			fm.WriteChatId(chatID)
-			fm.SendMessage()
+			err = fm.SendMessage()
 		}
+	}
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
 func Acceptance(phrase, name string, chatID int) {
 	var (
-		text, image, kbName, kbData string
+		text, image, video string
+		kbName, kbData     []string
 	)
-	text, image, kbName, kbData = redirection.DispatcherPhrase(phrase, name, chatID)
+	text, image, video, kbName, kbData = redirection.DispatcherPhrase(phrase, name, chatID)
 
-	doSend(text, image, kbName, kbData, chatID)
+	doSend(text, image, video, kbName, kbData, chatID)
 }

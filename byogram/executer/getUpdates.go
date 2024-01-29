@@ -38,9 +38,15 @@ func handleTelegramResponse(response []byte, text, name *string, user_id *int) (
 			err = fmt.Errorf("Telegram API вернул ошибку: %s", telegramAnswer.Result)
 		} else {
 			if len(telegramAnswer.Result) > 0 {
-				*text = telegramAnswer.Result[0].Message.Text
-				*name = telegramAnswer.Result[0].Message.TypeFrom.Name
-				*user_id = telegramAnswer.Result[0].Message.TypeFrom.UserID
+				if telegramAnswer.Result[0].Message.Text != "" {
+					*text = telegramAnswer.Result[0].Message.Text
+					*name = telegramAnswer.Result[0].Message.TypeFrom.Name
+					*user_id = telegramAnswer.Result[0].Message.TypeFrom.UserID
+				} else {
+					*text = telegramAnswer.Result[0].Query.Data
+					*name = telegramAnswer.Result[0].Query.TypeFrom.Name
+					*user_id = telegramAnswer.Result[0].Query.TypeFrom.UserID
+				}
 				fmt.Println(fmt.Sprintf("Обработка успешного ответа от Telegram. Name: %s Text: %s UserID: %d", string(*name), string(*text), int(*user_id)))
 			} else {
 				err = fmt.Errorf("telegramAnswer.Result ничему не равен!")
