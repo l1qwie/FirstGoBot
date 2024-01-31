@@ -14,8 +14,8 @@ func GetgetRequest(url string) (err error) {
 	if err == nil {
 		defer response.Body.Close()
 	}
-	body, _ := io.ReadAll(response.Body)
-	fmt.Println(string(body))
+	_, err = io.ReadAll(response.Body)
+	//fmt.Println(string(body))
 
 	return err
 }

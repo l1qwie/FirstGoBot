@@ -1,37 +1,10 @@
 package main
 
-import (
-	"firstgobot/bot"
-	executer "firstgobot/byogram/executer"
-	"firstgobot/byogram/types"
-	"fmt"
-)
+import "firstgobot/byogram"
 
 func main() {
-	var (
-		offset  int
-		text    string
-		name    string
-		user_id int
-		err     error
-	)
-
-	err = executer.HowToKnowOffset(types.TelebotToken, &offset)
-	for err != nil {
-		err = executer.HowToKnowOffset(types.TelebotToken, &offset)
-	}
-	for {
-		err = executer.DoGetUpdates(types.TelebotToken, &offset, &user_id, &text, &name)
-		if err != nil {
-			fmt.Println("Обновления не были получены: ", err)
-		} else {
-			bot.Acceptance(text, name, user_id)
-			//if err != nil {
-			//	fmt.Println("Ошибка при попытке отправить сообщенрие пользователю:", err)
-			//}
-			offset = offset + 1
-		}
-	}
+	byogram.StartWithTelegram()
+	//byogram.StartTests()
 }
 
 /*

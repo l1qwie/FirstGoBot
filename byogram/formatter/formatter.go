@@ -4,7 +4,28 @@ import (
 	"bytes"
 	"encoding/json"
 	"firstgobot/byogram/methods"
+	"firstgobot/byogram/types"
 )
+
+func (fm *Formatter) Reset() {
+	*fm = Formatter{
+		Message: types.SendMessagePayload{
+			ChatID:      0,
+			Text:        "",
+			ReplyMarkup: "",
+			Photo:       "",
+			Video:       "",
+		},
+		Keyboard: InlineKeyboard{
+			Keyboard: nil,
+			x:        0,
+			y:        0,
+		},
+		contenttype: "",
+		kindofmedia: 0,
+		mediatype:   "",
+	}
+}
 
 func (fm *Formatter) WriteString(lineoftext string) {
 	fm.Message.Text = lineoftext
@@ -14,7 +35,7 @@ func (fm *Formatter) WriteChatId(chatID int) {
 	fm.Message.ChatID = chatID
 }
 
-func (fm *Formatter) SendMessage() error {
+func (fm *Formatter) Send() error {
 	var (
 		jsonMessage  []byte
 		jsonKeyboard []byte
@@ -61,6 +82,7 @@ func (fm *Formatter) SendMessage() error {
 	if err == nil {
 		methods.Send(finalBuffer, function, fm.contenttype)
 	}
+	fm.Reset()
 
 	return err
 }

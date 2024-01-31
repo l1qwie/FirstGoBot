@@ -1,5 +1,7 @@
 package formatter
 
+import "fmt"
+
 func (fm *Formatter) SetIkbdDim(dim []int) {
 
 	fm.Keyboard.Keyboard = make([][]btn, len(dim))
@@ -17,6 +19,7 @@ func (fm *Formatter) doRutine() {
 
 func (fm *Formatter) WriteInlineButtonCmd(label, cmd string) {
 	fm.doRutine()
+	fmt.Println(label)
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Label = label
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].what = bCmd
 	fm.Keyboard.Keyboard[fm.Keyboard.y][fm.Keyboard.x].Cmd = cmd

@@ -4,11 +4,7 @@ import (
 	"fmt"
 )
 
-func DispatcherPhrase(phrase, name string, chatID int) (string, string, string, []string, []string) {
-	var (
-		text, image, video string
-		kbData, kbName     []string
-	)
+func DispatcherPhrase(phrase, name string, chatID int) (text, image, video string, kbName, kbData []string) {
 
 	if phrase == "/start" {
 		text = fmt.Sprintf("Hello, World! Hello, %s", name)

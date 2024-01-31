@@ -1,7 +1,9 @@
 package executer
 
-func DoGetUpdates(token string, offset, user_id *int, text, name *string) error {
-	return Updates(token, offset, user_id, text, name)
+import types "firstgobot/byogram/types"
+
+func DoGetUpdates(token string, offset *int, telegramResponse *types.TelegramResponse) error {
+	return Updates(token, offset, telegramResponse)
 }
 
 func HowToKnowOffset(token string, offset *int) error {
