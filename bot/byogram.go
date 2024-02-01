@@ -34,5 +34,9 @@ func Receiving(tr types.TelegramResponse, fm types.FMTRS) {
 	} else {
 		fm.WriteString(fmt.Sprintf("Sorry, I couldn't understand you, %s", tr.Result[0].Message.TypeFrom.Name))
 	}
-	fm.WriteChatId(tr.Result[0].Message.TypeFrom.UserID)
+	if tr.Result[0].Message.TypeFrom.UserID != 0 {
+		fm.WriteChatId(tr.Result[0].Message.TypeFrom.UserID)
+	} else {
+		fm.WriteChatId(tr.Result[0].Query.TypeFrom.UserID)
+	}
 }

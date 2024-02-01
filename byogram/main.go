@@ -48,22 +48,21 @@ func StartWithTelegram() {
 		telegramResponse types.TelegramResponse
 	)
 
-	err = executer.HowToKnowOffset(types.TelebotToken, &offset)
+	err = executer.RequestOffset(types.TelebotToken, &offset)
 	for err != nil {
-		err = executer.HowToKnowOffset(types.TelebotToken, &offset)
+		err = executer.RequestOffset(types.TelebotToken, &offset)
 	}
 	for {
-		err = executer.DoGetUpdates(types.TelebotToken, &offset, &telegramResponse)
+		err = executer.Updates(types.TelebotToken, &offset, &telegramResponse)
 		if err != nil {
 			fmt.Println("Обновления не были получены: ", err)
 		} else if len(telegramResponse.Result) == 0 {
-			fmt.Println("a")
 		} else {
 			fmt.Println(telegramResponse)
 			fmt.Println(offset)
 			bot.Receiving(telegramResponse, &fm)
 			fm.Send()
-			//Reset(&telegramResponse)
+			Reset(&telegramResponse)
 			offset = offset + 1
 		}
 	}

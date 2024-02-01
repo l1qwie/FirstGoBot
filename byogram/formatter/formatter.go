@@ -3,7 +3,7 @@ package formatter
 import (
 	"bytes"
 	"encoding/json"
-	"firstgobot/byogram/methods"
+	"firstgobot/byogram/executer"
 	"firstgobot/byogram/types"
 )
 
@@ -80,7 +80,7 @@ func (fm *Formatter) Send() error {
 	}
 	//fmt.Print("There is a list", fmt.Sprint(finalBuffer.String()))
 	if err == nil {
-		methods.Send(finalBuffer, function, fm.contenttype)
+		executer.Send(finalBuffer, function, fm.contenttype)
 	}
 	fm.Reset()
 

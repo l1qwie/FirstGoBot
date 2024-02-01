@@ -1,11 +1,118 @@
 package executer
 
-import types "firstgobot/byogram/types"
+import (
+	"bytes"
+	"encoding/json"
+	"firstgobot/byogram/errors"
+	types "firstgobot/byogram/types"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
+)
 
-func DoGetUpdates(token string, offset *int, telegramResponse *types.TelegramResponse) error {
-	return Updates(token, offset, telegramResponse)
+func GetpostRequest(url string, Buffer *bytes.Buffer, contenttype string) (err error) {
+	var (
+		request  *http.Request
+		response *http.Response
+		client   *http.Client
+	)
+
+	request, err = http.NewRequest("POST", url, Buffer)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	request.Header.Set("Content-Type", contenttype)
+	client = &http.Client{}
+	response, err = client.Do(request)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer response.Body.Close()
+
+	body, _ := io.ReadAll(response.Body)
+	fmt.Println(string(body))
+
+	return err
 }
 
-func HowToKnowOffset(token string, offset *int) error {
-	return RequestOffset(token, offset)
+func Send(buf *bytes.Buffer, function, contenttype string) {
+	var (
+		err error
+		url string
+	)
+	url = fmt.Sprintf("%sbot%s/%s", types.HttpsRequest, types.TelebotToken, function)
+	err = GetpostRequest(url, buf, contenttype)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Updates(TelebotToken string, offset *int, telegramResponse *types.TelegramResponse) (err error) {
+	var (
+		url      string
+		response *http.Response
+		body     []byte
+	)
+
+	url = fmt.Sprintf(types.HttpsRequest+"bot%s/getUpdates?limit=1&offset=%d", TelebotToken, *offset)
+	response, err = http.Get(url)
+	if err == nil {
+		body, err = io.ReadAll(response.Body)
+	}
+	if err == nil {
+		err = handlerTelegramResponse(body, telegramResponse)
+	}
+	response.Body.Close()
+	return err
+}
+
+func handlerTelegramResponse(response []byte, telegramResponse *types.TelegramResponse) (err error) {
+	err = json.Unmarshal(response, &telegramResponse)
+	if err == nil {
+		if !telegramResponse.Ok {
+			err = fmt.Errorf(fmt.Sprintf("Telegram API вернул ошибку: %s", telegramResponse.Error.Message))
+		}
+	}
+
+	return err
+}
+
+func handlerOffsetResponse(response []byte, offset *int) (err error) {
+	var telegramResponse types.JustForUpdate
+
+	err = json.Unmarshal(response, &telegramResponse)
+	if err == nil {
+		if len(telegramResponse.Result) > 0 {
+			for _, storage := range telegramResponse.Result {
+				*offset = storage.ID
+			}
+		} else {
+			err = errors.UpdatesMisstakes("Telegram returned an empty data of telegramResponse")
+		}
+	}
+
+	return err
+}
+
+func RequestOffset(TelebotToken string, offset *int) (err error) {
+	var (
+		response *http.Response
+		body     []byte
+	)
+
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?limit=1", url.PathEscape(TelebotToken))
+	response, err = http.Get(url)
+	if err == nil {
+		body, err = io.ReadAll(response.Body)
+	}
+	if err == nil {
+		err = handlerOffsetResponse(body, offset)
+	}
+	response.Body.Close()
+
+	return err
 }
