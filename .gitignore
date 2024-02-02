@@ -1,4 +1,5 @@
 go.mod
+go.sum
 byogram/types/data.go
 FOOTBALL1.jpg
 q.jpg

@@ -1,9 +1,16 @@
 package main
 
-import "firstgobot/byogram"
+import (
+	"firstgobot/database"
+	"log"
+)
 
 func main() {
-	byogram.StartWithTelegram()
+	err := database.FirstConnect()
+	if err != nil {
+		log.Fatal(err)
+	}
+	//byogram.StartWithTelegram()
 	//byogram.StartTests()
 }
 

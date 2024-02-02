@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 const HttpsRequest = "https://api.telegram.org/"
 
 /*
@@ -68,4 +70,8 @@ type FMTRS interface {
 	SetIkbdDim([]int)
 	WriteInlineButtonCmd(string, string)
 	WriteInlineButtonUrl(string, string)
+}
+
+func ConnectTo() (body string) {
+	return fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s", username, password, dbname, sslmode)
 }
