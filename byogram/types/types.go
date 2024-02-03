@@ -70,6 +70,12 @@ type FMTRS interface {
 	SetIkbdDim([]int)
 	WriteInlineButtonCmd(string, string)
 	WriteInlineButtonUrl(string, string)
+	Send() error
+}
+
+type Responser interface {
+	RequestOffset(string, *int) error
+	Updates(string, *int, *TelegramResponse) error
 }
 
 func ConnectTo() (body string) {

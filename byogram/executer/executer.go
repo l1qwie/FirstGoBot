@@ -12,6 +12,14 @@ import (
 	"net/url"
 )
 
+type Telegram struct {
+	Url string
+}
+
+type TelegramTest struct {
+	Url string
+}
+
 func GetpostRequest(url string, Buffer *bytes.Buffer, contenttype string) (err error) {
 	var (
 		request  *http.Request
@@ -53,13 +61,12 @@ func Send(buf *bytes.Buffer, function, contenttype string) {
 
 func Updates(TelebotToken string, offset *int, telegramResponse *types.TelegramResponse) (err error) {
 	var (
-		url      string
 		response *http.Response
 		body     []byte
 	)
 
-	url = fmt.Sprintf(types.HttpsRequest+"bot%s/getUpdates?limit=1&offset=%d", TelebotToken, *offset)
-	response, err = http.Get(url)
+	Url := fmt.Sprintf(types.HttpsRequest+"bot%s/getUpdates?limit=1&offset=%d", TelebotToken, *offset)
+	response, err = http.Get(Url)
 	if err == nil {
 		body, err = io.ReadAll(response.Body)
 	}
@@ -104,8 +111,8 @@ func RequestOffset(TelebotToken string, offset *int) (err error) {
 		body     []byte
 	)
 
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?limit=1", url.PathEscape(TelebotToken))
-	response, err = http.Get(url)
+	Url := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?limit=1", url.PathEscape(TelebotToken))
+	response, err = http.Get(Url)
 	if err == nil {
 		body, err = io.ReadAll(response.Body)
 	}
@@ -115,4 +122,13 @@ func RequestOffset(TelebotToken string, offset *int) (err error) {
 	response.Body.Close()
 
 	return err
+}
+
+func (test *TelegramTest) RequestOffset(TelebotToken string, offset *int) error {
+	return nil
+}
+
+func (test *TelegramTest) Updates(TelebotToken string, offset *int, telegramResponse *types.TelegramResponse) error {
+
+	return nil
 }

@@ -1,18 +1,20 @@
 package bot
 
 import (
+	"firstgobot/byogram/formatter"
 	"firstgobot/byogram/helper"
 	"firstgobot/byogram/types"
 	"fmt"
+	"time"
 )
 
-func Receiving(tr types.TelegramResponse, fm types.FMTRS) {
+func Receiving(tr *types.TelegramResponse) *formatter.Formatter {
 	var (
 		kbData      []string
 		kbName      []string
 		coordinates []int
+		fm          formatter.Formatter
 	)
-
 	text := helper.ReturnText(tr)
 	chatID := helper.ReturnChatId(tr)
 	name := helper.ReturnName(tr)
@@ -36,8 +38,12 @@ func Receiving(tr types.TelegramResponse, fm types.FMTRS) {
 	} else if text == "/video" {
 		fm.WriteString("Hello, firend!")
 		fm.AddVideoFromTG("BAACAgIAAxkDAAIJW2W3sTguaruPGvo722qeKTcOPwvxAAIzPQACy-DASekiOEg76qGiNAQ")
+	} else if text == "/wait" {
+		time.Sleep(time.Second)
+		fm.WriteString(fmt.Sprintf("Thank you for your wait, %s", name))
 	} else {
 		fm.WriteString(fmt.Sprintf("Sorry, I couldn't understand you, %s", name))
 	}
 	fm.WriteChatId(chatID)
+	return &fm
 }

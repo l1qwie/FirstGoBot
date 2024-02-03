@@ -35,6 +35,10 @@ func (fm *Formatter) WriteChatId(chatID int) {
 	fm.Message.ChatID = chatID
 }
 
+func (fm *Formatter) Complete() {
+
+}
+
 func (fm *Formatter) Send() error {
 	var (
 		jsonMessage  []byte

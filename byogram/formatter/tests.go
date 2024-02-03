@@ -1,89 +1,10 @@
-package tests
+package formatter
 
 import (
 	"firstgobot/byogram/errors"
 	"fmt"
 	"log"
 )
-
-func (tfm *Formatter) WriteString(lineoftext string) {
-	tfm.Message.Text = lineoftext
-}
-
-func (tfm *Formatter) WriteChatId(chatID int) {
-	tfm.Message.ChatID = chatID
-}
-
-func (tfm *Formatter) AddPhotoFromStorage(path string) {
-	tfm.Message.Photo = path
-	tfm.kindofmedia = fromStorage
-	tfm.mediatype = "photo"
-}
-
-func (tfm *Formatter) AddPhotoFromTG(path string) {
-	tfm.Message.Photo = path
-	tfm.kindofmedia = fromTelegram
-	tfm.mediatype = "photo"
-}
-
-func (tfm *Formatter) AddPhotoFromInternet(path string) {
-	tfm.Message.Photo = path
-	tfm.kindofmedia = fromInternet
-	tfm.mediatype = "photo"
-}
-
-func (tfm *Formatter) AddVideoFromStorage(path string) {
-	tfm.Message.Video = path
-	tfm.kindofmedia = fromStorage
-	tfm.mediatype = "video"
-}
-
-func (tfm *Formatter) AddVideoFromTG(path string) {
-	tfm.Message.Video = path
-	tfm.kindofmedia = fromTelegram
-	tfm.mediatype = "video"
-}
-
-func (tfm *Formatter) AddVideoFromInternet(path string) {
-	tfm.Message.Video = path
-	tfm.kindofmedia = fromInternet
-	tfm.mediatype = "video"
-}
-
-func (tfm *Formatter) SetIkbdDim(dim []int) {
-
-	tfm.Keyboard.Keyboard = make([][]Btn, len(dim))
-	for i := 0; i < len(dim); i++ {
-		tfm.Keyboard.Keyboard[i] = make([]Btn, dim[i])
-	}
-}
-
-func (fm *Formatter) doRutine() {
-	if fm.Keyboard.x == len(fm.Keyboard.Keyboard[fm.Keyboard.y]) {
-		fm.Keyboard.x = 0
-		fm.Keyboard.y = fm.Keyboard.y + 1
-	}
-}
-
-func (tfm *Formatter) WriteInlineButtonCmd(label, cmd string) {
-	tfm.doRutine()
-	tfm.Keyboard.Keyboard[tfm.Keyboard.y][tfm.Keyboard.x].Label = label
-	tfm.Keyboard.Keyboard[tfm.Keyboard.y][tfm.Keyboard.x].what = bCmd
-	tfm.Keyboard.Keyboard[tfm.Keyboard.y][tfm.Keyboard.x].Cmd = cmd
-
-	tfm.Keyboard.x = tfm.Keyboard.x + 1
-
-}
-
-func (tfm *Formatter) WriteInlineButtonUrl(label, url string) {
-	tfm.doRutine()
-	tfm.Keyboard.Keyboard[tfm.Keyboard.y][tfm.Keyboard.x].Label = label
-	tfm.Keyboard.Keyboard[tfm.Keyboard.y][tfm.Keyboard.x].what = bUrl
-	tfm.Keyboard.Keyboard[tfm.Keyboard.y][tfm.Keyboard.x].Url = url
-
-	tfm.Keyboard.x = tfm.Keyboard.x + 1
-
-}
 
 func (tfm *Formatter) AssertPhoto(path string, condition bool) (err error) {
 	var function string
