@@ -4,53 +4,62 @@ import (
 	"firstgobot/bot"
 	"firstgobot/byogram/executer"
 	"firstgobot/byogram/formatter"
+	"firstgobot/byogram/helper"
 	"firstgobot/byogram/types"
 	"fmt"
 	"log"
 	"time"
 )
 
-func pollResponse(responses chan<- *types.TelegramResponse) {
+func pollResponse(output chan<- *formatter.Formatter, reg *executer.RegTable) {
 	var (
 		offset           int
 		err              error
 		telegramResponse *types.TelegramResponse
+		index            int
+		chatID           int
+		//privateChan      chan *types.TelegramResponse
 	)
 
 	err = executer.RequestOffset(types.TelebotToken, &offset)
 	for err != nil {
 		err = executer.RequestOffset(types.TelebotToken, &offset)
 	}
+	//privateChan = make(chan *types.TelegramResponse)
 	for {
 		telegramResponse = new(types.TelegramResponse)
-		err = executer.Updates(types.TelebotToken, &offset, telegramResponse)
-		if err != nil {
+		err = executer.Updates(&offset, telegramResponse)
+		if len(telegramResponse.Result) != 0 && err == nil {
+			chatID = helper.ReturnChatId(telegramResponse)
+
+			index = reg.Seeker(chatID)
+			if index != executer.None {
+				reg.Reg[index].Ch <- telegramResponse
+			} else {
+				index = reg.NewIndex()
+				reg.Reg[index].UserId = chatID
+				reg.Reg[index].Ch = make(chan *types.TelegramResponse, 10)
+				fmt.Println("help1", index)
+				reg.Reg[index].Ch <- telegramResponse
+				fmt.Println("help2")
+				go worker(reg.Reg[index].Ch, output)
+			}
+			offset = offset + 1
+		} else if err != nil {
 			log.Fatal(err)
 		}
-		if len(telegramResponse.Result) != 0 {
-			responses <- telegramResponse
-			offset = offset + 1
-		}
 	}
-
-	/*for response := range responses {
-		fmt.Println(offset)
-		telegramResponse = new(types.TelegramResponse)
-		if err != nil {
-			fmt.Println("Обновления не были получены: ", err)
-		} else if len(telegramResponse.Result) == 0 {
-		} else {
-			fmt.Println(telegramResponse)
-			fmt.Println(offset)
-			go worker(*telegramResponse, newFm())
-			offset = offset + 1
-		}
-	}*/
 }
-func worker(r *types.TelegramResponse, output chan<- *formatter.Formatter) {
-	fm := bot.Receiving(r)
-	fm.Complete()
-	output <- fm
+
+func worker(input <-chan *types.TelegramResponse, output chan<- *formatter.Formatter) {
+	fmt.Println("In worker")
+	for len(input) > 0 {
+		//for r, any := <- input {
+		fm := bot.Receiving(<-input)
+		fm.Complete()
+		output <- fm
+	}
+	//закрой за мной дверь, я ухожу
 }
 
 func pushRequest(requests <-chan *formatter.Formatter) {
@@ -62,21 +71,17 @@ func pushRequest(requests <-chan *formatter.Formatter) {
 	}
 }
 
-func dispatcher(input <-chan *types.TelegramResponse, output chan<- *formatter.Formatter) {
-	for r := range input {
-		go worker(r, output)
-	}
-}
-
 func StartWithTelegram() {
-	var responses chan *types.TelegramResponse
-	var requests chan *formatter.Formatter
-
-	responses = make(chan *types.TelegramResponse)
+	var (
+		requests chan *formatter.Formatter
+		reg      *executer.RegTable
+	)
 	requests = make(chan *formatter.Formatter)
-	go pollResponse(responses)
-	go dispatcher(responses, requests)
+	reg = new(executer.RegTable)
+	go pollResponse(requests, reg)
+	//go dispatcher(responses, requests)
 	go pushRequest(requests)
+	//go doubleСheck(responses, stg)
 
 	for {
 		time.Sleep(time.Second)
@@ -108,7 +113,7 @@ func StartTests() {
 		},
 	}
 
-	go dispatcher(responses, requests)
+	//go dispatcher(responses, requests)
 	close(responses)
 	r := <-requests
 	r.AssertString("Hello! It's just a keyboard for a test, Jonh", true)

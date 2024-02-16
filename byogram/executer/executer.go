@@ -12,12 +12,23 @@ import (
 	"net/url"
 )
 
+const None = -1
+
 type Telegram struct {
 	Url string
 }
 
 type TelegramTest struct {
 	Url string
+}
+
+type Entry struct {
+	UserId int
+	Ch     chan *types.TelegramResponse
+}
+
+type RegTable struct {
+	Reg []Entry
 }
 
 func GetpostRequest(url string, Buffer *bytes.Buffer, contenttype string) (err error) {
@@ -59,14 +70,14 @@ func Send(buf *bytes.Buffer, function, contenttype string) {
 	}
 }
 
-func Updates(TelebotToken string, offset *int, telegramResponse *types.TelegramResponse) (err error) {
+func Updates(offset *int, telegramResponse *types.TelegramResponse) (err error) {
 	var (
 		response *http.Response
 		body     []byte
 	)
 
-	Url := fmt.Sprintf(types.HttpsRequest+"bot%s/getUpdates?limit=1&offset=%d", TelebotToken, *offset)
-	response, err = http.Get(Url)
+	url := fmt.Sprintf(types.HttpsRequest+"bot%s/getUpdates?limit=1&offset=%d", types.TelebotToken, *offset)
+	response, err = http.Get(url)
 	if err == nil {
 		body, err = io.ReadAll(response.Body)
 	}
@@ -86,6 +97,26 @@ func handlerTelegramResponse(response []byte, telegramResponse *types.TelegramRe
 	}
 
 	return err
+}
+
+func (reg *RegTable) Seeker(chatID int) (index int) {
+	var i int
+	index = None
+	if len(reg.Reg) != 0 {
+		for i < len(reg.Reg) && reg.Reg[i].UserId != chatID {
+			i++
+		}
+		if reg.Reg[i].UserId == chatID {
+			index = i
+		}
+	}
+	return index
+}
+
+func (reg *RegTable) NewIndex() (newIndex int) {
+	newIndex = len(reg.Reg)
+	reg.Reg = append(reg.Reg, Entry{})
+	return newIndex
 }
 
 func handlerOffsetResponse(response []byte, offset *int) (err error) {
@@ -132,3 +163,34 @@ func (test *TelegramTest) Updates(TelebotToken string, offset *int, telegramResp
 
 	return nil
 }
+
+/*
+type entry struct { user int; ch *chan<-Response }
+
+var reg []entry
+
+func this (user int) int //return index of user in the registry
+{
+	return none
+}
+
+funr free () int // return free index in the registry
+{
+	return none
+}
+
+func Writer ()
+{
+	var rs Response
+	getRs(rs)
+	n = this(rs.user)
+	if n != none { reg[n].ch <- rs }
+	else {
+		n = free()
+		reg[n].user = rs.user
+		reg[n].ch = /* create a new channel
+		reg[n].ch <- rs
+		go Worker(reg[n].ch)
+	}
+}
+*/
